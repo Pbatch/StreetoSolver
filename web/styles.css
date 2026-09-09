@@ -24,16 +24,13 @@ main { padding: 56px 0 72px; }
 header { align-items: end; display: flex; justify-content: space-between; margin: 0 auto 32px; max-width: 1180px; padding: 0 24px; }
 h1 { font-size: clamp(36px, 6vw, 68px); letter-spacing: -.055em; line-height: .95; margin: 0; max-width: 700px; }
 .panel { background: color-mix(in srgb, var(--card) 94%, transparent); border-block: 1px solid var(--line); box-shadow: 0 18px 50px rgb(36 31 21 / 8%); overflow: hidden; }
-form { align-items: end; display: grid; gap: 18px; grid-template-columns: minmax(240px, 1fr) minmax(180px, .45fr) auto; margin: 0 auto; max-width: 1180px; padding: 22px 24px; }
+form { align-items: end; display: grid; gap: 18px; grid-template-columns: minmax(240px, 1fr) minmax(180px, .45fr); margin: 0 auto; max-width: 1180px; padding: 22px 24px; }
 label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 8px; }
 select { appearance: none; background: white; border: 1px solid #cbc8bd; border-radius: 10px; color: var(--ink); font: inherit; height: 48px; padding: 0 14px; width: 100%; }
 select:focus, input:focus { outline: 3px solid rgb(6 103 216 / 18%); outline-offset: 2px; }
 .range-label { align-items: center; display: flex; justify-content: space-between; }
 output { color: var(--purple-dark); font-size: 15px; }
 input[type="range"] { accent-color: var(--purple); cursor: pointer; height: 48px; margin: 0; width: 100%; }
-button { background: var(--ink); border: 0; border-radius: 10px; color: white; cursor: pointer; font: inherit; font-size: 15px; font-weight: 700; height: 48px; padding: 0 24px; }
-button:hover { background: var(--purple-dark); }
-button:disabled { cursor: wait; opacity: .65; }
 .message { background: #fff1ef; border-top: 1px solid #efc3bd; color: #952c1f; margin: 0; padding: 16px 22px; }
 .result-head { align-items: center; border-top: 1px solid var(--line); display: flex; gap: 28px; justify-content: space-between; margin: 0 auto; max-width: 1180px; padding: 18px 24px; }
 .stat { display: inline-flex; flex-direction: column; margin-right: 30px; }
@@ -49,6 +46,5 @@ button:disabled { cursor: wait; opacity: .65; }
   header { padding: 0 14px; }
   header { align-items: start; flex-direction: column; gap: 18px; }
   form { grid-template-columns: 1fr; }
-  button { width: 100%; }
   .result-head { align-items: start; flex-direction: column; gap: 14px; }
 }

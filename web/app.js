@@ -3,12 +3,13 @@
 const form = document.querySelector("#route-form");
 const message = document.querySelector("#message");
 const result = document.querySelector("#result");
-const submitButton = form.querySelector("button");
+const mapInput = form.elements.map_id;
 const distanceInput = form.elements.distance;
 const distanceValue = document.querySelector("#distance-value");
 let map;
 let renderedLayers = [];
 let activeMapId;
+let selectionVersion = 0;
 
 function clearMap() {
   for (const layer of renderedLayers) {
@@ -74,7 +75,7 @@ function fillMapWithImage(imageSize) {
   );
 }
 
-async function renderRoute(data, mapId) {
+function renderRoute(data, mapId, imageSize) {
   const {
     solution,
     route_geojson: routeGeojson,
@@ -85,7 +86,6 @@ async function renderRoute(data, mapId) {
     solution.distance / 1000
   ).toFixed(2);
   const imageSource = `./data/${mapId}/map.jpg`;
-  const imageSize = await loadImageSize(imageSource);
   const imageBounds = [[0, 0], [imageSize.height, imageSize.width]];
   document.querySelector("#map").style.aspectRatio = (
     `${imageSize.width} / ${imageSize.height}`
@@ -152,13 +152,12 @@ async function renderRoute(data, mapId) {
   fillMapWithImage(imageSize);
 }
 
-form.addEventListener("submit", async (event) => {
-  event.preventDefault();
-  const formData = new FormData(form);
-  const mapId = String(formData.get("map_id"));
-  const distance = Number(formData.get("distance"));
+async function updateRoute() {
+  const version = ++selectionVersion;
+  const mapId = mapInput.value;
+  const distance = Number(distanceInput.value);
 
-  if (![...form.elements.map_id.options].some(({value}) => value === mapId)) {
+  if (![...mapInput.options].some(({value}) => value === mapId)) {
     message.textContent = "Select a valid map.";
     message.hidden = false;
     result.hidden = true;
@@ -172,33 +171,48 @@ form.addEventListener("submit", async (event) => {
     return;
   }
 
-  submitButton.disabled = true;
-  submitButton.textContent = "Loading…";
   message.hidden = true;
   try {
     const response = await fetch(`./data/${mapId}/${distance}.json`);
     if (!response.ok) {
       throw new Error(`No precomputed ${distance} km route was found.`);
     }
-    await renderRoute(await response.json(), mapId);
+    const data = await response.json();
+    const imageSize = await loadImageSize(`./data/${mapId}/map.jpg`);
+    if (version !== selectionVersion) {
+      return;
+    }
+    renderRoute(data, mapId, imageSize);
+    window.history.replaceState(
+      null,
+      "",
+      `?map_id=${encodeURIComponent(mapId)}&distance=${distance}`,
+    );
   } catch (error) {
+    if (version !== selectionVersion) {
+      return;
+    }
     result.hidden = true;
     message.textContent = error instanceof Error
       ? error.message
       : "The route could not be loaded.";
     message.hidden = false;
-  } finally {
-    submitButton.disabled = false;
-    submitButton.textContent = "Calculate optimal route";
   }
+}
+
+form.addEventListener("submit", (event) => event.preventDefault());
+mapInput.addEventListener("change", updateRoute);
+distanceInput.addEventListener("input", () => {
+  updateDistanceValue();
+  updateRoute();
 });
 
-distanceInput.addEventListener("input", updateDistanceValue);
-
 const query = new URLSearchParams(window.location.search);
-if (query.has("map_id") && query.has("distance")) {
-  form.elements.map_id.value = query.get("map_id");
-  distanceInput.value = query.get("distance");
-  updateDistanceValue();
-  form.requestSubmit();
+if (query.has("map_id")) {
+  mapInput.value = query.get("map_id");
 }
+if (query.has("distance")) {
+  distanceInput.value = query.get("distance");
+}
+updateDistanceValue();
+updateRoute();
