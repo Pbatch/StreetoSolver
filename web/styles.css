@@ -20,9 +20,7 @@ body {
   font-family: Inter, ui-sans-serif, system-ui, sans-serif;
 }
 
-main { padding: 56px 0 72px; }
-header { align-items: end; display: flex; justify-content: space-between; margin: 0 auto 32px; max-width: 1180px; padding: 0 24px; }
-h1 { font-size: clamp(36px, 6vw, 68px); letter-spacing: -.055em; line-height: .95; margin: 0; max-width: 700px; }
+main { padding: 24px 0 72px; }
 .panel { background: color-mix(in srgb, var(--card) 94%, transparent); border-block: 1px solid var(--line); box-shadow: 0 18px 50px rgb(36 31 21 / 8%); overflow: hidden; }
 form { align-items: end; display: grid; gap: 18px; grid-template-columns: minmax(240px, 1fr) minmax(180px, .45fr); margin: 0 auto; max-width: 1180px; padding: 22px 24px; }
 label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 8px; }
@@ -42,8 +40,7 @@ input[type="range"] { accent-color: var(--purple); cursor: pointer; height: 48px
 .leaflet-popup-content { font-family: inherit; }
 
 @media (max-width: 760px) {
-  main { padding: 32px 0 48px; }
-  header { padding: 0 14px; }
+  main { padding: 16px 0 48px; }
   header { align-items: start; flex-direction: column; gap: 18px; }
   form { grid-template-columns: 1fr; }
   .result-head { align-items: start; flex-direction: column; gap: 14px; }
