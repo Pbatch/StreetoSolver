@@ -1,0 +1,201 @@
+"use strict";
+
+const form = document.querySelector("#route-form");
+const message = document.querySelector("#message");
+const result = document.querySelector("#result");
+const submitButton = form.querySelector("button");
+const distanceInput = form.elements.distance;
+const distanceValue = document.querySelector("#distance-value");
+let map;
+let renderedLayers = [];
+let activeMapId;
+
+function clearMap() {
+  for (const layer of renderedLayers) {
+    layer.remove();
+  }
+  renderedLayers = [];
+}
+
+function updateDistanceValue() {
+  distanceValue.textContent = `${distanceInput.value} km`;
+}
+
+function projectLocation(location, geometry, imageSize) {
+  const radians = Math.PI / 180;
+  const latitude = Number(location.latitude);
+  const longitude = Number(location.longitude);
+  const centreLatitude = Number(geometry.centre_latitude);
+  const centreLongitude = Number(geometry.centre_longitude);
+  const mercatorNorthing = (value) => 6378137 * Math.log(
+    Math.tan(Math.PI / 4 + value * radians / 2),
+  );
+  const scaleCorrection = Math.cos(centreLatitude * radians);
+  const metresPerPixel = Number(geometry.scale) * 0.0254 / Number(geometry.dpi);
+  const east = 6378137 * (longitude - centreLongitude) * radians
+    * scaleCorrection / metresPerPixel;
+  const north = (mercatorNorthing(latitude) - mercatorNorthing(centreLatitude))
+    * scaleCorrection / metresPerPixel;
+  const rotation = Number(geometry.rotation);
+  const x = imageSize.width / 2
+    + Math.cos(rotation) * east
+    + Math.sin(rotation) * north;
+  const y = imageSize.height / 2
+    + Math.sin(rotation) * east
+    - Math.cos(rotation) * north;
+  return [imageSize.height - y, x];
+}
+
+function loadImageSize(source) {
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+    image.addEventListener("load", () => resolve({
+      width: image.naturalWidth,
+      height: image.naturalHeight,
+    }));
+    image.addEventListener("error", () => reject(
+      new Error("The original OOM map could not be loaded."),
+    ));
+    image.src = source;
+  });
+}
+
+function fillMapWithImage(imageSize) {
+  const viewport = map.getSize();
+  const zoom = Math.max(
+    Math.log2(viewport.x / imageSize.width),
+    Math.log2(viewport.y / imageSize.height),
+  );
+  map.setMinZoom(zoom);
+  map.setView(
+    [imageSize.height / 2, imageSize.width / 2],
+    zoom,
+    {animate: false},
+  );
+}
+
+async function renderRoute(data, mapId) {
+  const {
+    solution,
+    route_geojson: routeGeojson,
+    map_geometry: mapGeometry,
+  } = data;
+  document.querySelector("#points").textContent = solution.value;
+  document.querySelector("#route-distance").textContent = (
+    solution.distance / 1000
+  ).toFixed(2);
+  const imageSource = `./data/${mapId}/map.jpg`;
+  const imageSize = await loadImageSize(imageSource);
+  const imageBounds = [[0, 0], [imageSize.height, imageSize.width]];
+
+  if (!map || activeMapId !== mapId) {
+    if (map) {
+      map.remove();
+    }
+    renderedLayers = [];
+    map = L.map("map", {
+      crs: L.CRS.Simple,
+      minZoom: -2,
+      zoomSnap: 0,
+      zoomControl: false,
+    });
+    L.control.zoom({position: "bottomright"}).addTo(map);
+    L.imageOverlay(imageSource, imageBounds).addTo(map);
+    map.setMaxBounds(L.latLngBounds(imageBounds).pad(0.25));
+    map.on("resize", () => fillMapWithImage(imageSize));
+    activeMapId = mapId;
+  } else {
+    clearMap();
+  }
+
+  const routeCoordinates = routeGeojson.features[0].geometry.coordinates.map(
+    ([longitude, latitude]) => projectLocation(
+      {latitude, longitude},
+      mapGeometry,
+      imageSize,
+    ),
+  );
+  const routeCasing = L.polyline(routeCoordinates, {
+    color: "white",
+    opacity: 0.9,
+    weight: 9,
+  }).addTo(map);
+  const routeLayer = L.polyline(routeCoordinates, {
+    color: "#0667d8",
+    opacity: 0.95,
+    weight: 5,
+  }).addTo(map);
+  renderedLayers.push(routeCasing, routeLayer);
+
+  solution.route.slice(0, -1).forEach((location, index) => {
+    const start = index === 0;
+    const icon = L.divIcon({
+      className: `control-label${start ? " start" : ""}`,
+      html: start ? "S/F" : String(location.number),
+    });
+    const marker = L.marker(projectLocation(location, mapGeometry, imageSize), {
+      icon,
+    }).addTo(map);
+    const popup = document.createElement("div");
+    popup.textContent = start
+      ? "Start and finish"
+      : `Visit ${index} · Control ${location.number} · ${location.points} points`;
+    marker.bindPopup(popup);
+    renderedLayers.push(marker);
+  });
+
+  result.hidden = false;
+  map.invalidateSize();
+  fillMapWithImage(imageSize);
+}
+
+form.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const formData = new FormData(form);
+  const mapId = String(formData.get("map_id"));
+  const distance = Number(formData.get("distance"));
+
+  if (![...form.elements.map_id.options].some(({value}) => value === mapId)) {
+    message.textContent = "Select a valid map.";
+    message.hidden = false;
+    result.hidden = true;
+    return;
+  }
+
+  if (!Number.isInteger(distance) || distance < 5 || distance > 15) {
+    message.textContent = "Distance must be an integer from 5 to 15 km.";
+    message.hidden = false;
+    result.hidden = true;
+    return;
+  }
+
+  submitButton.disabled = true;
+  submitButton.textContent = "Loading…";
+  message.hidden = true;
+  try {
+    const response = await fetch(`./data/${mapId}/${distance}.json`);
+    if (!response.ok) {
+      throw new Error(`No precomputed ${distance} km route was found.`);
+    }
+    await renderRoute(await response.json(), mapId);
+  } catch (error) {
+    result.hidden = true;
+    message.textContent = error instanceof Error
+      ? error.message
+      : "The route could not be loaded.";
+    message.hidden = false;
+  } finally {
+    submitButton.disabled = false;
+    submitButton.textContent = "Calculate optimal route";
+  }
+});
+
+distanceInput.addEventListener("input", updateDistanceValue);
+
+const query = new URLSearchParams(window.location.search);
+if (query.has("map_id") && query.has("distance")) {
+  form.elements.map_id.value = query.get("map_id");
+  distanceInput.value = query.get("distance");
+  updateDistanceValue();
+  form.requestSubmit();
+}

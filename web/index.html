@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Find a high-scoring Street-O walking route.">
+  <title>Street-O Solver</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="./styles.css?v=4">
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
+  <script src="./app.js?v=6" defer></script>
+</head>
+<body>
+  <main>
+    <header>
+      <div>
+        <h1>Street-O Solver</h1>
+      </div>
+    </header>
+
+    <section class="panel">
+      <form id="route-form">
+        <div>
+          <label for="map-id">Event</label>
+          <select id="map-id" name="map_id" required>
+            <option value="6a9939a6dd86d">2026 September - Covent Garden</option>
+            <option value="65df3394229ce">2024 March - West Hampstead</option>
+          </select>
+        </div>
+        <div>
+          <label class="range-label" for="distance">
+            Maximum distance
+            <output id="distance-value" for="distance">10 km</output>
+          </label>
+          <input id="distance" name="distance" type="range" min="5" max="15" step="1" value="10">
+        </div>
+        <button type="submit">Calculate optimal route</button>
+      </form>
+
+      <p id="message" class="message" role="status" aria-live="polite" hidden></p>
+
+      <section id="result" hidden>
+        <div class="result-head">
+          <div>
+            <div class="stat"><strong id="points">—</strong><span>points</span></div>
+            <div class="stat"><strong id="route-distance">—</strong><span>kilometres</span></div>
+          </div>
+        </div>
+        <div id="map" aria-label="Solved walking route"></div>
+      </section>
+    </section>
+  </main>
+</body>
+</html>
