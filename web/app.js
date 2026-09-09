@@ -5,6 +5,8 @@ const message = document.querySelector("#message");
 const result = document.querySelector("#result");
 const mapInput = form.elements.map_id;
 const distanceInput = form.elements.distance;
+const eventDataPromises = new Map();
+const imageSizePromises = new Map();
 let map;
 let renderedLayers = [];
 let activeMapId;
@@ -50,7 +52,10 @@ function projectLocation(location, geometry, imageSize) {
 }
 
 function loadImageSize(source) {
-  return new Promise((resolve, reject) => {
+  if (imageSizePromises.has(source)) {
+    return imageSizePromises.get(source);
+  }
+  const promise = new Promise((resolve, reject) => {
     const image = new Image();
     image.addEventListener("load", () => resolve({
       width: image.naturalWidth,
@@ -61,6 +66,27 @@ function loadImageSize(source) {
     ));
     image.src = source;
   });
+  imageSizePromises.set(source, promise);
+  return promise;
+}
+
+async function loadEventData(mapId) {
+  if (!eventDataPromises.has(mapId)) {
+    eventDataPromises.set(mapId, fetch(`./data/${mapId}/routes.json`).then(
+      (response) => {
+        if (!response.ok) {
+          throw new Error(`No route data was found for event ${mapId}.`);
+        }
+        return response.json();
+      },
+    ));
+  }
+  try {
+    return await eventDataPromises.get(mapId);
+  } catch (error) {
+    eventDataPromises.delete(mapId);
+    throw error;
+  }
 }
 
 function fillMapWithImage(imageSize) {
@@ -77,15 +103,14 @@ function fillMapWithImage(imageSize) {
   );
 }
 
-function renderRoute(data, mapId, imageSize) {
-  const {
-    solution,
-    route_geojson: routeGeojson,
-    map_geometry: mapGeometry,
-  } = data;
-  document.querySelector("#points").textContent = solution.value;
+function renderRoute(data, routeData, mapId, imageSize) {
+  const route = routeData.visits.map((number) => {
+    const [latitude, longitude, points] = data.locations[number];
+    return {latitude, longitude, number, points};
+  });
+  document.querySelector("#points").textContent = routeData.value;
   document.querySelector("#route-distance").textContent = (
-    solution.distance / 1000
+    routeData.distance / 1000
   ).toFixed(2);
   const imageSource = `./data/${mapId}/map.jpg`;
   const imageBounds = [[0, 0], [imageSize.height, imageSize.width]];
@@ -110,10 +135,10 @@ function renderRoute(data, mapId, imageSize) {
     clearMap();
   }
 
-  const routeCoordinates = routeGeojson.features[0].geometry.coordinates.map(
+  const routeCoordinates = routeData.path.map(
     ([longitude, latitude]) => projectLocation(
       {latitude, longitude},
-      mapGeometry,
+      data.map_geometry,
       imageSize,
     ),
   );
@@ -129,7 +154,7 @@ function renderRoute(data, mapId, imageSize) {
   }).addTo(map);
   renderedLayers.push(routeCasing, routeLayer);
 
-  solution.route.slice(0, -1).forEach((location, index) => {
+  route.slice(0, -1).forEach((location, index) => {
     const start = index === 0;
     const description = start
       ? "Start and finish"
@@ -182,16 +207,16 @@ async function updateRoute(version) {
 
   message.hidden = true;
   try {
-    const response = await fetch(`./data/${mapId}/${distance}.json`);
-    if (!response.ok) {
+    const data = await loadEventData(mapId);
+    const routeData = data.routes[String(distance)];
+    if (!routeData) {
       throw new Error(`No precomputed ${distance} km route was found.`);
     }
-    const data = await response.json();
     const imageSize = await loadImageSize(`./data/${mapId}/map.jpg`);
     if (version !== selectionVersion) {
       return;
     }
-    renderRoute(data, mapId, imageSize);
+    renderRoute(data, routeData, mapId, imageSize);
     window.history.replaceState(
       null,
       "",
