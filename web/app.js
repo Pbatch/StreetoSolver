@@ -137,7 +137,9 @@ function renderRoute(data, mapId, imageSize) {
       : `Visit ${index}, control ${location.number}, ${location.points} points`;
     const icon = L.divIcon({
       className: `control-label${start ? " start" : ""}`,
-      html: start ? "S/F" : String(index),
+      html: start
+        ? '<svg aria-hidden="true"><use href="#start-finish-symbol"></use></svg>'
+        : String(index),
     });
     const marker = L.marker(projectLocation(location, mapGeometry, imageSize), {
       alt: description,

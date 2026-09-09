@@ -6,11 +6,20 @@
   <meta name="description" content="Find a high-scoring Street-O walking route.">
   <title>Street-O Solver</title>
   <link rel="stylesheet" href="./vendor/leaflet/leaflet.css">
-  <link rel="stylesheet" href="./styles.css?v=21">
+  <link rel="stylesheet" href="./styles.css?v=22">
   <script src="./vendor/leaflet/leaflet.js" defer></script>
-  <script src="./app.js?v=17" defer></script>
+  <script src="./app.js?v=18" defer></script>
 </head>
 <body>
+  <svg class="svg-symbols" aria-hidden="true">
+    <defs>
+      <symbol id="start-finish-symbol" viewBox="0 0 44 44">
+        <circle cx="22" cy="22" r="19" fill="white" fill-opacity=".9" stroke="currentColor" stroke-width="2.5"></circle>
+        <circle cx="22" cy="22" r="15" fill="none" stroke="currentColor" stroke-width="2.5"></circle>
+        <path d="M22 8.5 34 29.5H10Z" fill="none" stroke="currentColor" stroke-linejoin="round" stroke-width="2.5"></path>
+      </symbol>
+    </defs>
+  </svg>
   <main>
     <h1 class="visually-hidden">Street-O Solver</h1>
     <section class="panel" aria-labelledby="route-controls-heading">
@@ -52,7 +61,7 @@
           <div class="map-legend" role="group" aria-label="Map legend">
             <span><i class="legend-route"></i>Route</span>
             <span><i class="legend-visit">1</i>Visit order</span>
-            <span><i class="legend-start">S/F</i>Start / finish</span>
+            <span><svg class="legend-start" aria-hidden="true"><use href="#start-finish-symbol"></use></svg>Start / finish</span>
           </div>
         </div>
       </section>

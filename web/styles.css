@@ -10,6 +10,7 @@
 }
 
 * { box-sizing: border-box; }
+.svg-symbols { height: 0; position: absolute; width: 0; }
 
 .visually-hidden {
   clip: rect(0 0 0 0);
@@ -62,11 +63,11 @@ input[type="range"]::-moz-range-thumb { background: var(--purple); border: 2px s
 .map-legend { align-items: center; background: rgb(255 255 255 / 92%); border: 1px solid rgb(0 0 0 / 16%); border-radius: 6px; bottom: 12px; display: flex; flex-wrap: wrap; font-size: 12px; font-weight: 650; gap: 14px; left: 12px; padding: 8px 10px; position: absolute; z-index: 500; }
 .map-legend span { align-items: center; display: inline-flex; gap: 6px; }
 .legend-route { border-bottom: 4px solid var(--route); display: inline-block; width: 25px; }
-.legend-visit, .legend-start { align-items: center; border: 2px solid; border-radius: 50%; display: inline-flex; font-size: 10px; font-style: normal; font-weight: 800; height: 22px; justify-content: center; width: 22px; }
-.legend-visit { background: var(--route); border-color: white; box-shadow: 0 0 0 1px var(--route); color: white; }
-.legend-start { background: #f7dd2e; border-color: #c93535; color: #4a1515; width: 29px; }
+.legend-visit { align-items: center; background: var(--route); border: 2px solid white; border-radius: 50%; box-shadow: 0 0 0 1px var(--route); color: white; display: inline-flex; font-size: 10px; font-style: normal; font-weight: 800; height: 22px; justify-content: center; width: 22px; }
+.legend-start { color: #c93535; height: 30px; width: 30px; }
 .control-label { background: var(--route); border: 2px solid white; border-radius: 20px; box-shadow: 0 0 0 1px var(--route); color: white; font-size: 12px; font-weight: 700; height: 26px !important; line-height: 22px; margin-left: -13px !important; margin-top: -13px !important; text-align: center; width: 26px !important; }
-.control-label.start { background: #f7dd2e; border-color: #c93535; box-shadow: none; color: #4a1515; width: 34px !important; }
+.control-label.start { background: transparent; border: 0; box-shadow: none; color: #c93535; height: 44px !important; line-height: normal; margin-left: -22px !important; margin-top: -22px !important; width: 44px !important; }
+.control-label.start svg { display: block; height: 44px; width: 44px; }
 .leaflet-popup-content { font-family: inherit; }
 
 @media (max-width: 760px) {
