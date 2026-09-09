@@ -39,7 +39,7 @@ button:disabled { cursor: wait; opacity: .65; }
 .stat { display: inline-flex; flex-direction: column; margin-right: 30px; }
 .stat strong { font-size: 24px; letter-spacing: -.035em; }
 .stat span { color: var(--muted); font-size: 12px; font-weight: 600; text-transform: uppercase; }
-#map { background: #d7eef5; height: min(76vh, 820px); min-height: 480px; width: 100%; }
+#map { aspect-ratio: 4 / 3; background: #d7eef5; width: 100%; }
 .control-label { background: white; border: 2px solid var(--purple); border-radius: 20px; color: var(--purple-dark); font-size: 12px; font-weight: 700; height: 26px !important; line-height: 22px; margin-left: -13px !important; margin-top: -13px !important; text-align: center; width: 26px !important; }
 .control-label.start { background: #f7dd2e; border-color: #c93535; color: #4a1515; width: 34px !important; }
 .leaflet-popup-content { font-family: inherit; }
@@ -51,5 +51,4 @@ button:disabled { cursor: wait; opacity: .65; }
   form { grid-template-columns: 1fr; }
   button { width: 100%; }
   .result-head { align-items: start; flex-direction: column; gap: 14px; }
-  #map { min-height: 430px; }
 }

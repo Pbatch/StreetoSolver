@@ -62,7 +62,7 @@ function loadImageSize(source) {
 
 function fillMapWithImage(imageSize) {
   const viewport = map.getSize();
-  const zoom = Math.max(
+  const zoom = Math.min(
     Math.log2(viewport.x / imageSize.width),
     Math.log2(viewport.y / imageSize.height),
   );
@@ -87,6 +87,9 @@ async function renderRoute(data, mapId) {
   const imageSource = `./data/${mapId}/map.jpg`;
   const imageSize = await loadImageSize(imageSource);
   const imageBounds = [[0, 0], [imageSize.height, imageSize.width]];
+  document.querySelector("#map").style.aspectRatio = (
+    `${imageSize.width} / ${imageSize.height}`
+  );
 
   if (!map || activeMapId !== mapId) {
     if (map) {
