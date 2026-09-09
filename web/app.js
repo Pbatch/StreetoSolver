@@ -9,7 +9,6 @@ let map;
 let renderedLayers = [];
 let activeMapId;
 let selectionVersion = 0;
-let routeUpdateTimer;
 
 function clearMap() {
   for (const layer of renderedLayers) {
@@ -158,11 +157,9 @@ function renderRoute(data, mapId, imageSize) {
   fillMapWithImage(imageSize);
 }
 
-function scheduleRouteUpdate(delay = 0) {
+function requestRouteUpdate() {
   selectionVersion += 1;
-  const version = selectionVersion;
-  window.clearTimeout(routeUpdateTimer);
-  routeUpdateTimer = window.setTimeout(() => updateRoute(version), delay);
+  updateRoute(selectionVersion);
 }
 
 async function updateRoute(version) {
@@ -213,10 +210,10 @@ async function updateRoute(version) {
 }
 
 form.addEventListener("submit", (event) => event.preventDefault());
-mapInput.addEventListener("change", () => scheduleRouteUpdate());
+mapInput.addEventListener("change", requestRouteUpdate);
 distanceInput.addEventListener("input", () => {
   updateAccessibleDistanceValue();
-  scheduleRouteUpdate(150);
+  requestRouteUpdate();
 });
 
 const query = new URLSearchParams(window.location.search);
@@ -227,4 +224,4 @@ if (query.has("distance")) {
   distanceInput.value = query.get("distance");
 }
 updateAccessibleDistanceValue();
-scheduleRouteUpdate();
+requestRouteUpdate();
