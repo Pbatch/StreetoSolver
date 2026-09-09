@@ -104,6 +104,7 @@ function fillMapWithImage(imageSize) {
 }
 
 function renderRoute(data, routeData, mapId, imageSize) {
+  const mapGeometry = data.map_geometry;
   const route = routeData.visits.map((number) => {
     const [latitude, longitude, points] = data.locations[number];
     return {latitude, longitude, number, points};
@@ -138,7 +139,7 @@ function renderRoute(data, routeData, mapId, imageSize) {
   const routeCoordinates = routeData.path.map(
     ([longitude, latitude]) => projectLocation(
       {latitude, longitude},
-      data.map_geometry,
+      mapGeometry,
       imageSize,
     ),
   );
