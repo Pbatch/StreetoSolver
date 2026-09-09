@@ -6,9 +6,9 @@
   <meta name="description" content="Find a high-scoring Street-O walking route.">
   <title>Street-O Solver</title>
   <link rel="stylesheet" href="./vendor/leaflet/leaflet.css">
-  <link rel="stylesheet" href="./styles.css?v=8">
+  <link rel="stylesheet" href="./styles.css?v=10">
   <script src="./vendor/leaflet/leaflet.js" defer></script>
-  <script src="./app.js?v=9" defer></script>
+  <script src="./app.js?v=11" defer></script>
 </head>
 <body>
   <main>
@@ -47,17 +47,12 @@
         </div>
         <div id="map-shell">
           <div id="map" role="region" aria-label="Solved walking route"></div>
-          <button id="fullscreen-map" class="fullscreen-button" type="button">Full screen</button>
           <div class="map-legend" role="group" aria-label="Map legend">
             <span><i class="legend-route"></i>Route</span>
             <span><i class="legend-visit">1</i>Visit order</span>
             <span><i class="legend-start">S/F</i>Start / finish</span>
           </div>
         </div>
-        <details class="itinerary">
-          <summary>Route itinerary</summary>
-          <ol id="itinerary-list"></ol>
-        </details>
       </section>
     </section>
   </main>

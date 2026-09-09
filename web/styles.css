@@ -7,6 +7,7 @@
   --line: #dddacf;
   --purple: #0667d8;
   --purple-dark: #06499b;
+  --route: #b77900;
 }
 
 * { box-sizing: border-box; }
@@ -37,7 +38,7 @@ label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 8px; }
 .select-control { position: relative; }
 .select-control::after { border: solid var(--ink); border-width: 0 2px 2px 0; content: ""; height: 7px; pointer-events: none; position: absolute; right: 17px; top: 17px; transform: rotate(45deg); width: 7px; }
 select { appearance: none; background: white; border: 1px solid #cbc8bd; border-radius: 10px; color: var(--ink); font: inherit; height: 48px; padding: 0 44px 0 14px; width: 100%; }
-select:focus-visible, input:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px solid var(--purple); outline-offset: 3px; }
+select:focus-visible, input:focus-visible { outline: 3px solid var(--purple); outline-offset: 3px; }
 .range-label { align-items: center; display: flex; justify-content: space-between; }
 output { color: var(--purple-dark); font-size: 15px; }
 input[type="range"] { accent-color: var(--purple); cursor: pointer; height: 48px; margin: 0; width: 100%; }
@@ -49,21 +50,14 @@ input[type="range"] { accent-color: var(--purple); cursor: pointer; height: 48px
 .stat span { color: var(--muted); font-size: 12px; font-weight: 600; text-transform: uppercase; }
 #map-shell { background: #d7eef5; position: relative; }
 #map { height: min(80vh, 900px); min-height: 440px; width: 100%; }
-#map-shell:fullscreen { height: 100vh; width: 100vw; }
-#map-shell:fullscreen #map { height: 100%; max-height: none; }
-.fullscreen-button { background: white; border: 2px solid rgb(0 0 0 / 20%); border-radius: 4px; color: var(--ink); cursor: pointer; font: 700 13px/1 system-ui, sans-serif; padding: 9px 11px; position: absolute; right: 12px; top: 12px; z-index: 500; }
-.fullscreen-button:hover { background: #f4f4f4; }
 .map-legend { align-items: center; background: rgb(255 255 255 / 92%); border: 1px solid rgb(0 0 0 / 16%); border-radius: 6px; bottom: 12px; display: flex; flex-wrap: wrap; font-size: 12px; font-weight: 650; gap: 14px; left: 12px; padding: 8px 10px; position: absolute; z-index: 500; }
 .map-legend span { align-items: center; display: inline-flex; gap: 6px; }
-.legend-route { border-bottom: 4px solid var(--purple); display: inline-block; width: 25px; }
+.legend-route { border-bottom: 4px solid var(--route); display: inline-block; width: 25px; }
 .legend-visit, .legend-start { align-items: center; background: white; border: 2px solid var(--purple); border-radius: 50%; color: var(--purple-dark); display: inline-flex; font-size: 10px; font-style: normal; font-weight: 800; height: 22px; justify-content: center; width: 22px; }
 .legend-start { background: #f7dd2e; border-color: #c93535; color: #4a1515; width: 29px; }
 .control-label { background: white; border: 2px solid var(--purple); border-radius: 20px; color: var(--purple-dark); font-size: 12px; font-weight: 700; height: 26px !important; line-height: 22px; margin-left: -13px !important; margin-top: -13px !important; text-align: center; width: 26px !important; }
 .control-label.start { background: #f7dd2e; border-color: #c93535; color: #4a1515; width: 34px !important; }
 .leaflet-popup-content { font-family: inherit; }
-.itinerary { margin: 0 auto; max-width: 1180px; padding: 18px 24px; }
-.itinerary summary { color: var(--purple-dark); cursor: pointer; font-weight: 700; width: fit-content; }
-.itinerary ol { columns: 2; line-height: 1.7; margin-bottom: 0; padding-left: 28px; }
 
 @media (max-width: 760px) {
   main { padding: 16px 0 48px; }
@@ -71,5 +65,4 @@ input[type="range"] { accent-color: var(--purple); cursor: pointer; height: 48px
   .result-head { align-items: start; flex-direction: column; gap: 14px; }
   #map { height: 70vh; min-height: 360px; }
   .map-legend { gap: 9px; }
-  .itinerary ol { columns: 1; }
 }
