@@ -21,6 +21,10 @@ function clearMap() {
 
 function updateDistanceValue() {
   distanceValue.textContent = `${distanceInput.value} km`;
+  distanceInput.setAttribute(
+    "aria-valuetext",
+    `${distanceInput.value} kilometres`,
+  );
 }
 
 function projectLocation(location, geometry, imageSize) {
