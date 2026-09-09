@@ -113,7 +113,7 @@ function renderRoute(data, routeData, mapId, imageSize) {
   document.querySelector("#route-distance").textContent = (
     routeData.distance / 1000
   ).toFixed(2);
-  const imageSource = `./data/${mapId}/map.jpg`;
+  const imageSource = `./data/${mapId}/map.webp`;
   const imageBounds = [[0, 0], [imageSize.height, imageSize.width]];
 
   if (!map || activeMapId !== mapId) {
@@ -213,7 +213,7 @@ async function updateRoute(version) {
     if (!routeData) {
       throw new Error(`No precomputed ${distance} km route was found.`);
     }
-    const imageSize = await loadImageSize(`./data/${mapId}/map.jpg`);
+    const imageSize = await loadImageSize(`./data/${mapId}/map.webp`);
     if (version !== selectionVersion) {
       return;
     }

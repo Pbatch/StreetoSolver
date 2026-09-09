@@ -78,10 +78,13 @@ def main(map_id: str, output_directory: Path | None) -> None:
     output_path = map_directory / "routes.json"
     matrix_path = Path(f"data/oom_{map_id}_points_distance_matrix.json")
     points_path = Path(f"data/oom_{map_id}_points.json")
-    map_path = Path(f"data/oom_{map_id}_map.jpg")
 
     try:
         map_directory.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(
+            Path(f"data/oom_{map_id}_map.webp"),
+            map_directory / "map.webp",
+        )
         migrate_legacy_routes(map_directory, output_path)
 
         output: dict[str, Any] | None = (
@@ -147,7 +150,6 @@ def main(map_id: str, output_directory: Path | None) -> None:
                 output_path,
             )
 
-        shutil.copy2(map_path, map_directory / "map.jpg")
         logger.info("Static site data is ready in {}", map_directory)
     except (
         HTTPError,

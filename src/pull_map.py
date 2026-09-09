@@ -6,6 +6,7 @@ import argparse
 import json
 import math
 import re
+from io import BytesIO
 from pathlib import Path
 from typing import Any
 from urllib.error import HTTPError, URLError
@@ -13,6 +14,7 @@ from urllib.parse import quote, urlencode
 from urllib.request import Request, urlopen
 
 from loguru import logger
+from PIL import Image
 
 
 def load_map(map_id: str) -> dict[str, Any]:
@@ -163,7 +165,7 @@ def render_url(map_id: str, map_data: dict[str, Any]) -> str:
 
 
 def pull_map_image(map_id: str, map_data: dict[str, Any], output_path: Path) -> None:
-    """Download OOM's JPG render."""
+    """Download OOM's JPG render and save it as quality-90 WebP."""
     request = Request(
         render_url(map_id, map_data),
         headers={"User-Agent": "StreetoSolver/0.1"},
@@ -173,12 +175,13 @@ def pull_map_image(map_id: str, map_data: dict[str, Any], output_path: Path) -> 
     if not image_data.startswith(b"\xff\xd8"):
         raise RuntimeError("OOM did not return a valid JPG image")
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    output_path.write_bytes(image_data)
+    with Image.open(BytesIO(image_data)) as image:
+        image.save(output_path, format="WEBP", quality=90, method=6)
 
 
 def main(map_id: str, output_path: Path | None, map_output_path: Path | None) -> None:
     output_path = output_path or Path(f"data/oom_{map_id}_points.json")
-    map_output_path = map_output_path or Path(f"data/oom_{map_id}_map.jpg")
+    map_output_path = map_output_path or Path(f"data/oom_{map_id}_map.webp")
     try:
         map_data = load_map(map_id)
         output = {
@@ -234,7 +237,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--map-output-path",
         type=Path,
-        help="JPG destination (default: data/oom_<map-id>_map.jpg)",
+        help="WebP destination (default: data/oom_<map-id>_map.webp)",
     )
     args = parser.parse_args()
     main(args.map_id, args.output_path, args.map_output_path)
