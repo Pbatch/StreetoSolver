@@ -124,7 +124,7 @@ function renderRoute(data, mapId, imageSize) {
     weight: 9,
   }).addTo(map);
   const routeLayer = L.polyline(routeCoordinates, {
-    color: "#d49a00",
+    color: "#00e5ff",
     opacity: 0.95,
     weight: 5,
   }).addTo(map);
