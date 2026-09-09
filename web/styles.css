@@ -45,7 +45,11 @@ input[type="range"] { accent-color: var(--purple); cursor: pointer; height: 48px
 .range-scale { color: var(--muted); margin-top: -10px; padding-inline: 8px; }
 .range-ticks { display: flex; justify-content: space-between; }
 .range-ticks i { border-left: 1px solid #969f9a; height: 5px; }
-.range-tick-labels { display: flex; font-size: 11px; font-weight: 600; justify-content: space-between; margin-top: 2px; }
+.range-tick-labels { font-size: 11px; font-weight: 600; height: 13px; margin-top: 2px; position: relative; }
+.range-tick-labels span { position: absolute; transform: translateX(-50%); }
+.range-tick-labels span:nth-child(1) { left: 0; }
+.range-tick-labels span:nth-child(2) { left: 50%; }
+.range-tick-labels span:nth-child(3) { left: 100%; }
 .message { background: #fff1ef; border-top: 1px solid #efc3bd; color: #952c1f; margin: 0; padding: 16px 22px; }
 .result-head { align-items: center; border-top: 1px solid var(--line); display: flex; gap: 28px; justify-content: space-between; margin: 0 auto; max-width: 1180px; padding: 18px 24px; }
 .stat { display: inline-flex; flex-direction: column; margin-right: 30px; }
