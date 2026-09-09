@@ -10,6 +10,7 @@ const imageSizePromises = new Map();
 let map;
 let renderedLayers = [];
 let activeMapId;
+let activeDistancePointer;
 let selectionVersion = 0;
 
 function clearMap() {
@@ -24,6 +25,23 @@ function updateAccessibleDistanceValue() {
     "aria-valuetext",
     `${distanceInput.value} kilometres`,
   );
+}
+
+function updateDistanceFromPointer(event) {
+  const bounds = distanceInput.getBoundingClientRect();
+  const minimum = Number(distanceInput.min);
+  const maximum = Number(distanceInput.max);
+  const thumbRadius = bounds.height / 2;
+  const position = Math.min(
+    1,
+    Math.max(
+      0,
+      (event.clientX - bounds.left - thumbRadius)
+        / (bounds.width - 2 * thumbRadius),
+    ),
+  );
+  distanceInput.value = String(Math.round(minimum + position * (maximum - minimum)));
+  updateAccessibleDistanceValue();
 }
 
 function projectLocation(location, geometry, imageSize) {
@@ -239,6 +257,33 @@ form.addEventListener("submit", (event) => event.preventDefault());
 mapInput.addEventListener("change", requestRouteUpdate);
 distanceInput.addEventListener("input", updateAccessibleDistanceValue);
 distanceInput.addEventListener("change", requestRouteUpdate);
+distanceInput.addEventListener("pointerdown", (event) => {
+  if (event.button !== 0) {
+    return;
+  }
+  event.preventDefault();
+  activeDistancePointer = event.pointerId;
+  distanceInput.setPointerCapture(event.pointerId);
+  distanceInput.focus();
+  updateDistanceFromPointer(event);
+});
+distanceInput.addEventListener("pointermove", (event) => {
+  if (event.pointerId === activeDistancePointer) {
+    updateDistanceFromPointer(event);
+  }
+});
+distanceInput.addEventListener("pointerup", (event) => {
+  if (event.pointerId !== activeDistancePointer) {
+    return;
+  }
+  updateDistanceFromPointer(event);
+  activeDistancePointer = undefined;
+  distanceInput.releasePointerCapture(event.pointerId);
+  requestRouteUpdate();
+});
+distanceInput.addEventListener("pointercancel", () => {
+  activeDistancePointer = undefined;
+});
 
 const query = new URLSearchParams(window.location.search);
 if (query.has("map_id")) {

@@ -39,7 +39,7 @@ label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 8px; }
 .select-control::after { border: solid var(--ink); border-width: 0 2px 2px 0; content: ""; height: 7px; pointer-events: none; position: absolute; right: 17px; top: 17px; transform: rotate(45deg); width: 7px; }
 select { appearance: none; background: white; border: 1px solid #cbc8bd; border-radius: 10px; color: var(--ink); font: inherit; height: 48px; padding: 0 44px 0 14px; width: 100%; }
 select:focus-visible, input:focus-visible { outline: 3px solid var(--purple); outline-offset: 3px; }
-input[type="range"] { appearance: none; background: transparent; cursor: pointer; display: block; height: 20px; margin: 0; width: 100%; }
+input[type="range"] { appearance: none; background: transparent; cursor: pointer; display: block; height: 20px; margin: 0; touch-action: none; width: 100%; }
 input[type="range"]::-webkit-slider-runnable-track { background: #b9c2bd; border-radius: 3px; height: 6px; }
 input[type="range"]::-webkit-slider-thumb { appearance: none; background: var(--purple); border: 2px solid white; border-radius: 50%; box-shadow: 0 0 0 1px var(--purple); height: 20px; margin-top: -7px; width: 20px; }
 input[type="range"]::-moz-range-track { background: #b9c2bd; border-radius: 3px; height: 6px; }
