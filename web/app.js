@@ -237,10 +237,8 @@ async function updateRoute(version) {
 
 form.addEventListener("submit", (event) => event.preventDefault());
 mapInput.addEventListener("change", requestRouteUpdate);
-distanceInput.addEventListener("input", () => {
-  updateAccessibleDistanceValue();
-  requestRouteUpdate();
-});
+distanceInput.addEventListener("input", updateAccessibleDistanceValue);
+distanceInput.addEventListener("change", requestRouteUpdate);
 
 const query = new URLSearchParams(window.location.search);
 if (query.has("map_id")) {
