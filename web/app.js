@@ -5,7 +5,6 @@ const message = document.querySelector("#message");
 const result = document.querySelector("#result");
 const mapInput = form.elements.map_id;
 const distanceInput = form.elements.distance;
-const distanceValue = document.querySelector("#distance-value");
 let map;
 let renderedLayers = [];
 let activeMapId;
@@ -19,8 +18,7 @@ function clearMap() {
   renderedLayers = [];
 }
 
-function updateDistanceValue() {
-  distanceValue.textContent = `${distanceInput.value} km`;
+function updateAccessibleDistanceValue() {
   distanceInput.setAttribute(
     "aria-valuetext",
     `${distanceInput.value} kilometres`,
@@ -215,7 +213,7 @@ async function updateRoute(version) {
 form.addEventListener("submit", (event) => event.preventDefault());
 mapInput.addEventListener("change", () => scheduleRouteUpdate());
 distanceInput.addEventListener("input", () => {
-  updateDistanceValue();
+  updateAccessibleDistanceValue();
   scheduleRouteUpdate(150);
 });
 
@@ -226,5 +224,5 @@ if (query.has("map_id")) {
 if (query.has("distance")) {
   distanceInput.value = query.get("distance");
 }
-updateDistanceValue();
+updateAccessibleDistanceValue();
 scheduleRouteUpdate();

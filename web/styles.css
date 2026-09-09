@@ -39,8 +39,6 @@ label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 8px; }
 .select-control::after { border: solid var(--ink); border-width: 0 2px 2px 0; content: ""; height: 7px; pointer-events: none; position: absolute; right: 17px; top: 17px; transform: rotate(45deg); width: 7px; }
 select { appearance: none; background: white; border: 1px solid #cbc8bd; border-radius: 10px; color: var(--ink); font: inherit; height: 48px; padding: 0 44px 0 14px; width: 100%; }
 select:focus-visible, input:focus-visible { outline: 3px solid var(--purple); outline-offset: 3px; }
-.range-label { align-items: center; display: flex; justify-content: space-between; }
-output { color: var(--purple-dark); font-size: 15px; }
 input[type="range"] { accent-color: var(--purple); cursor: pointer; height: 48px; margin: 0; width: 100%; }
 .range-scale { color: var(--muted); margin-top: -10px; padding-inline: 8px; }
 .range-ticks { display: flex; justify-content: space-between; }
