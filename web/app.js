@@ -6,10 +6,14 @@ const result = document.querySelector("#result");
 const mapInput = form.elements.map_id;
 const distanceInput = form.elements.distance;
 const distanceValue = document.querySelector("#distance-value");
+const fullscreenButton = document.querySelector("#fullscreen-map");
+const mapShell = document.querySelector("#map-shell");
 let map;
 let renderedLayers = [];
 let activeMapId;
+let activeImageSize;
 let selectionVersion = 0;
+let routeUpdateTimer;
 
 function clearMap() {
   for (const layer of renderedLayers) {
@@ -75,6 +79,24 @@ function fillMapWithImage(imageSize) {
   );
 }
 
+function renderItinerary(route) {
+  const itinerary = document.querySelector("#itinerary-list");
+  itinerary.replaceChildren();
+  route.forEach((location, index) => {
+    const item = document.createElement("li");
+    if (index === 0) {
+      item.textContent = "Start";
+    } else if (index === route.length - 1) {
+      item.textContent = "Return to finish";
+    } else {
+      item.textContent = (
+        `Visit ${index}: control ${location.number} — ${location.points} points`
+      );
+    }
+    itinerary.append(item);
+  });
+}
+
 function renderRoute(data, mapId, imageSize) {
   const {
     solution,
@@ -85,11 +107,10 @@ function renderRoute(data, mapId, imageSize) {
   document.querySelector("#route-distance").textContent = (
     solution.distance / 1000
   ).toFixed(2);
+  renderItinerary(solution.route);
   const imageSource = `./data/${mapId}/map.jpg`;
   const imageBounds = [[0, 0], [imageSize.height, imageSize.width]];
-  document.querySelector("#map").style.aspectRatio = (
-    `${imageSize.width} / ${imageSize.height}`
-  );
+  activeImageSize = imageSize;
 
   if (!map || activeMapId !== mapId) {
     if (map) {
@@ -132,17 +153,21 @@ function renderRoute(data, mapId, imageSize) {
 
   solution.route.slice(0, -1).forEach((location, index) => {
     const start = index === 0;
+    const description = start
+      ? "Start and finish"
+      : `Visit ${index}, control ${location.number}, ${location.points} points`;
     const icon = L.divIcon({
       className: `control-label${start ? " start" : ""}`,
-      html: start ? "S/F" : String(location.number),
+      html: start ? "S/F" : String(index),
     });
     const marker = L.marker(projectLocation(location, mapGeometry, imageSize), {
+      alt: description,
       icon,
+      keyboard: true,
+      title: description,
     }).addTo(map);
     const popup = document.createElement("div");
-    popup.textContent = start
-      ? "Start and finish"
-      : `Visit ${index} · Control ${location.number} · ${location.points} points`;
+    popup.textContent = description;
     marker.bindPopup(popup);
     renderedLayers.push(marker);
   });
@@ -152,8 +177,14 @@ function renderRoute(data, mapId, imageSize) {
   fillMapWithImage(imageSize);
 }
 
-async function updateRoute() {
-  const version = ++selectionVersion;
+function scheduleRouteUpdate(delay = 0) {
+  selectionVersion += 1;
+  const version = selectionVersion;
+  window.clearTimeout(routeUpdateTimer);
+  routeUpdateTimer = window.setTimeout(() => updateRoute(version), delay);
+}
+
+async function updateRoute(version) {
   const mapId = mapInput.value;
   const distance = Number(distanceInput.value);
 
@@ -201,11 +232,40 @@ async function updateRoute() {
 }
 
 form.addEventListener("submit", (event) => event.preventDefault());
-mapInput.addEventListener("change", updateRoute);
+mapInput.addEventListener("change", () => scheduleRouteUpdate());
 distanceInput.addEventListener("input", () => {
   updateDistanceValue();
-  updateRoute();
+  scheduleRouteUpdate(150);
 });
+
+fullscreenButton.addEventListener("click", async () => {
+  try {
+    if (document.fullscreenElement) {
+      await document.exitFullscreen();
+    } else {
+      await mapShell.requestFullscreen();
+    }
+  } catch {
+    message.textContent = "Full-screen mode is not available in this browser.";
+    message.hidden = false;
+  }
+});
+
+document.addEventListener("fullscreenchange", () => {
+  fullscreenButton.textContent = document.fullscreenElement
+    ? "Exit full screen"
+    : "Full screen";
+  if (map && activeImageSize) {
+    window.requestAnimationFrame(() => {
+      map.invalidateSize();
+      fillMapWithImage(activeImageSize);
+    });
+  }
+});
+
+if (!mapShell.requestFullscreen) {
+  fullscreenButton.hidden = true;
+}
 
 const query = new URLSearchParams(window.location.search);
 if (query.has("map_id")) {
@@ -215,4 +275,4 @@ if (query.has("distance")) {
   distanceInput.value = query.get("distance");
 }
 updateDistanceValue();
-updateRoute();
+scheduleRouteUpdate();
