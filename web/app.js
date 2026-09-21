@@ -4,13 +4,13 @@ const form = document.querySelector("#route-form");
 const message = document.querySelector("#message");
 const result = document.querySelector("#result");
 const mapInput = form.elements.map_id;
-const distanceInput = form.elements.distance;
+const speedInput = form.elements.speed;
+const checkpointTimeInput = form.elements.checkpoint_time;
 const eventDataPromises = new Map();
 const imageSizePromises = new Map();
 let map;
 let renderedLayers = [];
 let activeMapId;
-let activeDistancePointer;
 let selectionVersion = 0;
 
 function clearMap() {
@@ -20,17 +20,11 @@ function clearMap() {
   renderedLayers = [];
 }
 
-function updateAccessibleDistanceValue() {
-  distanceInput.setAttribute(
-    "aria-valuetext",
-    `${distanceInput.value} kilometres`,
-  );
-}
-
-function updateDistanceFromPointer(event) {
-  const bounds = distanceInput.getBoundingClientRect();
-  const minimum = Number(distanceInput.min);
-  const maximum = Number(distanceInput.max);
+function updateRangeFromPointer(input, event) {
+  const bounds = input.getBoundingClientRect();
+  const minimum = Number(input.min);
+  const maximum = Number(input.max);
+  const step = Number(input.step);
   const thumbRadius = bounds.height / 2;
   const position = Math.min(
     1,
@@ -40,8 +34,46 @@ function updateDistanceFromPointer(event) {
         / (bounds.width - 2 * thumbRadius),
     ),
   );
-  distanceInput.value = String(Math.round(minimum + position * (maximum - minimum)));
-  updateAccessibleDistanceValue();
+  const value = minimum + position * (maximum - minimum);
+  input.value = String(Math.round(value / step) * step);
+  input.dispatchEvent(new Event("input"));
+}
+
+function configureRangeInput(input, accessibleValue) {
+  let activePointer;
+  const updateAccessibleValue = () => {
+    input.setAttribute("aria-valuetext", accessibleValue(input.value));
+  };
+  input.addEventListener("input", updateAccessibleValue);
+  input.addEventListener("change", requestRouteUpdate);
+  input.addEventListener("pointerdown", (event) => {
+    if (event.button !== 0) {
+      return;
+    }
+    event.preventDefault();
+    activePointer = event.pointerId;
+    input.setPointerCapture(event.pointerId);
+    input.focus();
+    updateRangeFromPointer(input, event);
+  });
+  input.addEventListener("pointermove", (event) => {
+    if (event.pointerId === activePointer) {
+      updateRangeFromPointer(input, event);
+    }
+  });
+  input.addEventListener("pointerup", (event) => {
+    if (event.pointerId !== activePointer) {
+      return;
+    }
+    updateRangeFromPointer(input, event);
+    activePointer = undefined;
+    input.releasePointerCapture(event.pointerId);
+    requestRouteUpdate();
+  });
+  input.addEventListener("pointercancel", () => {
+    activePointer = undefined;
+  });
+  updateAccessibleValue();
 }
 
 function projectLocation(location, geometry, imageSize) {
@@ -208,7 +240,8 @@ function requestRouteUpdate() {
 
 async function updateRoute(version) {
   const mapId = mapInput.value;
-  const distance = Number(distanceInput.value);
+  const speed = Number(speedInput.value);
+  const checkpointTime = Number(checkpointTimeInput.value);
 
   if (![...mapInput.options].some(({value}) => value === mapId)) {
     message.textContent = "Select a valid map.";
@@ -217,8 +250,15 @@ async function updateRoute(version) {
     return;
   }
 
-  if (!Number.isInteger(distance) || distance < 5 || distance > 15) {
-    message.textContent = "Distance must be an integer from 5 to 15 km.";
+  if (!Number.isInteger(speed) || speed < 5 || speed > 15) {
+    message.textContent = "Speed must be an integer from 5 to 15 km/h.";
+    message.hidden = false;
+    result.hidden = true;
+    return;
+  }
+
+  if (![0, 5, 10, 15, 20].includes(checkpointTime)) {
+    message.textContent = "Checkpoint time must be from 0 to 20 seconds in steps of 5.";
     message.hidden = false;
     result.hidden = true;
     return;
@@ -227,9 +267,11 @@ async function updateRoute(version) {
   message.hidden = true;
   try {
     const data = await loadEventData(mapId);
-    const routeData = data.routes[String(distance)];
+    const routeData = data.routes[String(checkpointTime)]?.[String(speed)];
     if (!routeData) {
-      throw new Error(`No precomputed ${distance} km route was found.`);
+      throw new Error(
+        `No route was found for ${speed} km/h and ${checkpointTime}-second clues.`,
+      );
     }
     const imageSize = await loadImageSize(`./data/${mapId}/map.webp`);
     if (version !== selectionVersion) {
@@ -239,7 +281,8 @@ async function updateRoute(version) {
     window.history.replaceState(
       null,
       "",
-      `?map_id=${encodeURIComponent(mapId)}&distance=${distance}`,
+      `?map_id=${encodeURIComponent(mapId)}&speed=${speed}`
+        + `&checkpoint_time=${checkpointTime}`,
     );
   } catch (error) {
     if (version !== selectionVersion) {
@@ -255,42 +298,25 @@ async function updateRoute(version) {
 
 form.addEventListener("submit", (event) => event.preventDefault());
 mapInput.addEventListener("change", requestRouteUpdate);
-distanceInput.addEventListener("input", updateAccessibleDistanceValue);
-distanceInput.addEventListener("change", requestRouteUpdate);
-distanceInput.addEventListener("pointerdown", (event) => {
-  if (event.button !== 0) {
-    return;
-  }
-  event.preventDefault();
-  activeDistancePointer = event.pointerId;
-  distanceInput.setPointerCapture(event.pointerId);
-  distanceInput.focus();
-  updateDistanceFromPointer(event);
-});
-distanceInput.addEventListener("pointermove", (event) => {
-  if (event.pointerId === activeDistancePointer) {
-    updateDistanceFromPointer(event);
-  }
-});
-distanceInput.addEventListener("pointerup", (event) => {
-  if (event.pointerId !== activeDistancePointer) {
-    return;
-  }
-  updateDistanceFromPointer(event);
-  activeDistancePointer = undefined;
-  distanceInput.releasePointerCapture(event.pointerId);
-  requestRouteUpdate();
-});
-distanceInput.addEventListener("pointercancel", () => {
-  activeDistancePointer = undefined;
-});
 
 const query = new URLSearchParams(window.location.search);
 if (query.has("map_id")) {
   mapInput.value = query.get("map_id");
 }
-if (query.has("distance")) {
-  distanceInput.value = query.get("distance");
+if (query.has("speed")) {
+  speedInput.value = query.get("speed");
+} else if (query.has("distance")) {
+  speedInput.value = query.get("distance");
 }
-updateAccessibleDistanceValue();
+if (query.has("checkpoint_time")) {
+  checkpointTimeInput.value = query.get("checkpoint_time");
+}
+configureRangeInput(
+  speedInput,
+  (value) => `${value} kilometres per hour`,
+);
+configureRangeInput(
+  checkpointTimeInput,
+  (value) => `${value} seconds per checkpoint`,
+);
 requestRouteUpdate();
