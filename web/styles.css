@@ -33,7 +33,7 @@ body {
 
 main { padding: 24px 0 72px; }
 .panel { background: color-mix(in srgb, var(--card) 94%, transparent); border-block: 1px solid var(--line); box-shadow: 0 18px 50px rgb(36 31 21 / 8%); overflow: hidden; }
-form { align-items: start; display: grid; gap: 18px; grid-template-columns: minmax(240px, 340px) minmax(260px, 1fr); margin: 0 auto; max-width: 1180px; padding: 22px 24px; }
+form { align-items: start; display: grid; gap: 18px; grid-template-columns: minmax(220px, 300px) repeat(2, minmax(220px, 1fr)); margin: 0 auto; max-width: 1180px; padding: 22px 24px; }
 label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 8px; }
 .select-control { position: relative; }
 .select-control::after { border: solid var(--ink); border-width: 0 2px 2px 0; content: ""; height: 7px; pointer-events: none; position: absolute; right: 17px; top: 17px; transform: rotate(45deg); width: 7px; }
@@ -53,6 +53,13 @@ input[type="range"]::-moz-range-thumb { background: var(--purple); border: 2px s
 .range-tick-labels span:nth-child(1) { left: 0; }
 .range-tick-labels span:nth-child(2) { left: 50%; }
 .range-tick-labels span:nth-child(3) { left: 100%; }
+.range-tick-labels-four span:nth-child(2) { left: 33.333%; }
+.range-tick-labels-four span:nth-child(3) { left: 66.667%; }
+.range-tick-labels-four span:nth-child(4) { left: 100%; }
+.range-tick-labels-five span:nth-child(2) { left: 25%; }
+.range-tick-labels-five span:nth-child(3) { left: 50%; }
+.range-tick-labels-five span:nth-child(4) { left: 75%; }
+.range-tick-labels-five span:nth-child(5) { left: 100%; }
 .message { background: #fff1ef; border-top: 1px solid #efc3bd; color: #952c1f; margin: 0; padding: 16px 22px; }
 .result-head { align-items: center; border-top: 1px solid var(--line); display: flex; gap: 28px; justify-content: space-between; margin: 0 auto; max-width: 1180px; padding: 10px 24px; }
 .stat { display: inline-flex; flex-direction: column; margin-right: 30px; }
@@ -72,7 +79,8 @@ input[type="range"]::-moz-range-thumb { background: var(--purple); border: 2px s
 
 @media (max-width: 760px) {
   main { padding: 16px 0 48px; }
-  form { gap: 12px; grid-template-columns: minmax(0, 1fr) minmax(180px, 1fr); }
+  form { gap: 12px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  form > div:first-child { grid-column: 1 / -1; }
   .result-head { align-items: start; flex-direction: column; gap: 14px; }
   #map { height: 70vh; min-height: 360px; }
   .map-legend { gap: 9px; }
@@ -80,4 +88,5 @@ input[type="range"]::-moz-range-thumb { background: var(--purple); border: 2px s
 
 @media (max-width: 480px) {
   form { grid-template-columns: 1fr; }
+  form > div:first-child { grid-column: auto; }
 }

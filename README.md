@@ -1,6 +1,7 @@
 # Street-O Solver
 
-Input how far you can run, and find your optimal score.
+Input your running speed and time spent solving each clue to find your optimal
+score within the event's one-hour limit.
 
 Website - https://pbatch.github.io/StreetoSolver/
 

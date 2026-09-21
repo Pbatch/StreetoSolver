@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Find a high-scoring Street-O walking route.">
+  <meta name="description" content="Find a high-scoring Street-O running route.">
   <title>Street-O Solver</title>
   <link rel="preload" href="./data/6a9939a6dd86d/map.webp" as="image" type="image/webp" fetchpriority="high">
   <link rel="stylesheet" href="./vendor/leaflet/leaflet.css">
-  <link rel="stylesheet" href="./styles.css?v=24">
+  <link rel="stylesheet" href="./styles.css?v=25">
   <script src="./vendor/leaflet/leaflet.js" defer></script>
-  <script src="./app.js?v=24" defer></script>
+  <script src="./app.js?v=25" defer></script>
 </head>
 <body>
   <svg class="svg-symbols" aria-hidden="true">
@@ -31,18 +31,32 @@
           <div class="select-control">
             <select id="map-id" name="map_id" required>
               <option value="6a9939a6dd86d">2026 September - Covent Garden</option>
+              <option value="69b0ac508ec7e">2026 March - Pimlico</option>
+              <option value="6824438624c36">2025 May - Bethnal Green</option>
+              <option value="67063b8beedec">2024 October - Peckham</option>
+              <option value="6638c75fd5366">2024 May - Clapham</option>
+              <option value="6609b1dc35c83">2024 April - Wandsworth</option>
               <option value="65df3394229ce">2024 March - West Hampstead</option>
+              <option value="65954f342dd46">2024 January - Chelsea</option>
             </select>
           </div>
         </div>
         <div>
-          <label for="distance">Maximum distance (km)</label>
-          <input id="distance" name="distance" type="range" min="5" max="15" step="1" value="10" aria-valuetext="10 kilometres">
+          <label for="speed">Running speed (km/h)</label>
+          <input id="speed" name="speed" type="range" min="5" max="15" step="1" value="10" aria-valuetext="10 kilometres per hour">
           <div class="range-scale" aria-hidden="true">
             <div class="range-ticks">
               <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
             </div>
             <div class="range-tick-labels"><span>5</span><span>10</span><span>15</span></div>
+          </div>
+        </div>
+        <div>
+          <label for="checkpoint-time">Time per clue (seconds)</label>
+          <input id="checkpoint-time" name="checkpoint_time" type="range" min="0" max="20" step="5" value="10" aria-valuetext="10 seconds">
+          <div class="range-scale" aria-hidden="true">
+            <div class="range-ticks"><i></i><i></i><i></i><i></i><i></i></div>
+            <div class="range-tick-labels range-tick-labels-five"><span>0</span><span>5</span><span>10</span><span>15</span><span>20</span></div>
           </div>
         </div>
       </form>
@@ -58,7 +72,7 @@
           </div>
         </div>
         <div id="map-shell">
-          <div id="map" role="region" aria-label="Solved walking route"></div>
+          <div id="map" role="region" aria-label="Solved running route"></div>
           <div class="map-legend" role="group" aria-label="Map legend">
             <span><i class="legend-route"></i>Route</span>
             <span><i class="legend-visit">1</i>Visit order</span>

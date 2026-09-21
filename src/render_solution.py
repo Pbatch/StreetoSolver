@@ -6,6 +6,8 @@ import argparse
 import html
 import json
 import os
+import time
+from http.client import HTTPException
 from pathlib import Path
 from typing import Any
 from urllib.error import HTTPError, URLError
@@ -13,6 +15,10 @@ from urllib.request import Request, urlopen
 
 from dotenv import load_dotenv
 from loguru import logger
+
+MAX_ROUTE_REQUEST_ATTEMPTS = 3
+DEFAULT_RETRY_DELAY_SECONDS = 60
+TRANSIENT_RETRY_DELAY_SECONDS = 5
 
 
 def load_solution(solution_path: Path) -> dict[str, Any]:
@@ -51,8 +57,28 @@ def fetch_route(route: list[dict[str, Any]], api_key: str) -> dict[str, Any]:
         },
         method="POST",
     )
-    with urlopen(request, timeout=60) as response:  # noqa: S310
-        geojson = json.load(response)
+    for attempt in range(MAX_ROUTE_REQUEST_ATTEMPTS):
+        try:
+            with urlopen(request, timeout=60) as response:  # noqa: S310
+                geojson = json.load(response)
+            break
+        except HTTPError as error:
+            if error.code != 429 or attempt == MAX_ROUTE_REQUEST_ATTEMPTS - 1:
+                raise
+            retry_delay = int(
+                error.headers.get("Retry-After", DEFAULT_RETRY_DELAY_SECONDS)
+            )
+            logger.warning("Route service rate limited; retrying in {} s", retry_delay)
+            time.sleep(retry_delay)
+        except (HTTPException, URLError):
+            if attempt == MAX_ROUTE_REQUEST_ATTEMPTS - 1:
+                raise
+            logger.warning(
+                "Route service connection failed; retrying in {} s",
+                TRANSIENT_RETRY_DELAY_SECONDS,
+            )
+            time.sleep(TRANSIENT_RETRY_DELAY_SECONDS)
+
     if geojson.get("type") != "FeatureCollection" or not geojson.get("features"):
         raise RuntimeError("routing service returned invalid GeoJSON")
     return geojson
@@ -149,6 +175,7 @@ def main(solution_path: Path, output_path: Path | None, api_key: str | None) -> 
         logger.info("Saved rendered solution to {}", output_path)
     except (
         HTTPError,
+        HTTPException,
         URLError,
         KeyError,
         TypeError,
