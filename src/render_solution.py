@@ -16,6 +16,8 @@ from urllib.request import Request, urlopen
 from dotenv import load_dotenv
 from loguru import logger
 
+from src.solve_streeto import clockwise_route
+
 MAX_ROUTE_REQUEST_ATTEMPTS = 3
 DEFAULT_RETRY_DELAY_SECONDS = 60
 TRANSIENT_RETRY_DELAY_SECONDS = 5
@@ -35,6 +37,7 @@ def load_solution(solution_path: Path) -> dict[str, Any]:
         int(location["points"])
         if "number" not in location:
             raise ValueError("every route location must have a number")
+    solution["route"] = clockwise_route(route)
     return solution
 
 

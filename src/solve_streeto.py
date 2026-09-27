@@ -171,6 +171,32 @@ class RouteSolver:
         )
 
 
+def is_counterclockwise(coordinates: Sequence[Sequence[float]]) -> bool:
+    """Use signed area in longitude/latitude order; zero-area loops stay as is.
+
+    For crossing loops, the larger enclosed lobes determine the direction.
+    Translate to the first point to avoid cancellation with geographic coordinates.
+    """
+    if len(coordinates) < 3:
+        return False
+    origin_x, origin_y = coordinates[0][:2]
+    area = sum(
+        (first[0] - origin_x) * (second[1] - origin_y)
+        - (second[0] - origin_x) * (first[1] - origin_y)
+        for first, second in zip(coordinates, coordinates[1:], strict=False)
+    )
+    return area > 0
+
+
+def clockwise_route(route: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Orient a closed checkpoint route clockwise, keeping its start and finish."""
+    coordinates = [
+        (float(location["longitude"]), float(location["latitude"]))
+        for location in route
+    ]
+    return list(reversed(route)) if is_counterclockwise(coordinates) else route
+
+
 def load_problem(matrix_path: Path) -> tuple[list[list[int]], list[dict[str, Any]]]:
     """Load and validate the distance matrix and vertex values."""
     data = json.loads(matrix_path.read_text(encoding="utf-8"))
@@ -235,7 +261,7 @@ def main(
             "route_duration_seconds": ROUTE_DURATION_SECONDS,
             "distance": solution.distance,
             "value": solution.value,
-            "route": [locations[node] for node in solution.visits],
+            "route": clockwise_route([locations[node] for node in solution.visits]),
         }
         output_path.parent.mkdir(parents=True, exist_ok=True)
         output_path.write_text(

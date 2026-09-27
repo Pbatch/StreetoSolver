@@ -22,6 +22,8 @@ from src.solve_streeto import (
     DEFAULT_SEARCH_TIME_LIMIT_SECONDS,
     RouteSolution,
     RouteSolver,
+    clockwise_route,
+    is_counterclockwise,
     load_problem,
 )
 
@@ -81,6 +83,25 @@ def compact_route(
     }
 
 
+def orient_cached_routes(output: dict[str, Any]) -> None:
+    """Keep cached visit order and walking geometry aligned clockwise."""
+    for routes in output["routes"].values():
+        for route in routes.values():
+            # Some older caches omit checkpoint locations; use their walking
+            # geometry to determine the direction in that case.
+            coordinates = (
+                [
+                    (output["locations"][number][1], output["locations"][number][0])
+                    for number in route["visits"]
+                ]
+                if all(number in output["locations"] for number in route["visits"])
+                else route["path"]
+            )
+            if is_counterclockwise(coordinates):
+                route["visits"].reverse()
+                route["path"].reverse()
+
+
 def migrate_legacy_routes(map_directory: Path, output_path: Path) -> bool:
     """Combine existing per-distance artifacts without recalculating routes."""
     legacy_paths = sorted(
@@ -109,6 +130,7 @@ def migrate_legacy_routes(map_directory: Path, output_path: Path) -> bool:
             solution, legacy["route_geojson"]
         )
 
+    orient_cached_routes(output)
     write_compact_json(output_path, output)
     for legacy_path in legacy_paths:
         legacy_path.unlink()
@@ -152,6 +174,10 @@ def main(
             output["routes"] = {"0": output["routes"]}
             write_compact_json(output_path, output)
             logger.info("Migrated cached routes to the speed/checkpoint-time format")
+
+        if output is not None:
+            orient_cached_routes(output)
+            write_compact_json(output_path, output)
 
         if output is not None and output.get("solver") != SOLVER_NAME:
             output["routes"] = {}
@@ -238,7 +264,9 @@ def main(
                     route_data = {
                         "distance": solved.distance,
                         "value": solved.value,
-                        "route": [locations[node] for node in solved.visits],
+                        "route": clockwise_route(
+                            [locations[node] for node in solved.visits]
+                        ),
                     }
                     route_geojson = fetch_route(route_data["route"], api_key)
                     time.sleep(ROUTE_REQUEST_INTERVAL_SECONDS)
