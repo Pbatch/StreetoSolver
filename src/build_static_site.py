@@ -22,6 +22,7 @@ from src.solve_streeto import (
     DEFAULT_SEARCH_TIME_LIMIT_SECONDS,
     RouteSolution,
     RouteSolver,
+    clockwise_route,
     load_problem,
 )
 
@@ -238,7 +239,9 @@ def main(
                     route_data = {
                         "distance": solved.distance,
                         "value": solved.value,
-                        "route": [locations[node] for node in solved.visits],
+                        "route": clockwise_route(
+                            [locations[node] for node in solved.visits]
+                        ),
                     }
                     route_geojson = fetch_route(route_data["route"], api_key)
                     time.sleep(ROUTE_REQUEST_INTERVAL_SECONDS)
