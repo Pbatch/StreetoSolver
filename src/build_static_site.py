@@ -285,7 +285,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--map-id",
-        default="6a9939a6dd86d",
+        default="6acfdeef5669a",
         help="OOM v4 map ID",
     )
     parser.add_argument(
@@ -297,7 +297,7 @@ if __name__ == "__main__":
         "--search-time-limit",
         default=DEFAULT_SEARCH_TIME_LIMIT_SECONDS,
         type=float,
-        help="solver time per route in seconds (default: 0.5)",
+        help="solver time per route in seconds (default: 5)",
     )
     args = parser.parse_args()
     main(
