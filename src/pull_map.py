@@ -225,7 +225,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "-m",
         "--map-id",
-        default="6acfdeef5669a",
+        default="6af61895b8431",
         help="OOM v4 map ID",
     )
     parser.add_argument(
